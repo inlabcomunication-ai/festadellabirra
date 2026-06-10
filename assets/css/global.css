@@ -1,0 +1,143 @@
+/* ═══════════════════════════════════════════════
+   global.css — Token, reset, componenti condivisi
+   Masseria Sacramento · Festa della Birra
+═══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap');
+
+:root {
+  /* Palette birra / masseria */
+  --espresso:    #1C120B;   /* fondo notte */
+  --malt:        #261810;   /* pannello scuro */
+  --malt-2:      #32200F;   /* pannello scuro alt */
+  --gold:        #E9A91D;   /* oro birra (accento) */
+  --gold-bright: #F6C141;   /* oro highlight */
+  --gold-deep:   #C8861A;   /* oro scuro hover */
+  --cream:       #F4E7D2;   /* testo crema */
+  --foam:        #FBF3E4;   /* schiuma / quasi bianco */
+  --terra:       #7A4B27;   /* terracotta footer */
+  --terra-dark:  #5A3318;
+  --line:        rgba(244,231,210,0.14);
+  --line-strong: rgba(244,231,210,0.28);
+  --muted:       rgba(244,231,210,0.55);
+  --green:       #5BA86B;
+  --red:         #D9694C;
+
+  --maxw: 1180px;
+  --shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--espresso);
+  color: var(--cream);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font-family: inherit; }
+
+::selection { background: var(--gold); color: var(--espresso); }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.6rem; }
+
+/* ── Tipografia di base ── */
+.display { font-family: 'Anton', sans-serif; font-weight: 400; letter-spacing: 0.01em; line-height: 0.92; text-transform: uppercase; }
+.cond    { font-family: 'Oswald', sans-serif; }
+.serif   { font-family: 'Cormorant Garamond', serif; }
+
+.eyebrow {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold); font-weight: 600; display: inline-block;
+}
+
+/* ── Pulsanti ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+  font-family: 'Oswald', sans-serif; font-weight: 600;
+  font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 1rem 2rem; border-radius: 999px; cursor: pointer;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease, border-color .18s;
+  white-space: nowrap;
+}
+.btn--gold   { background: var(--gold); color: var(--espresso); box-shadow: 0 10px 30px rgba(233,169,29,0.28); }
+.btn--gold:hover { background: var(--gold-bright); transform: translateY(-2px); box-shadow: 0 14px 38px rgba(233,169,29,0.4); }
+.btn--ghost  { background: transparent; border: 1.5px solid var(--line-strong); color: var(--cream); }
+.btn--ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn--block  { width: 100%; }
+.btn--lg     { padding: 1.18rem 2.4rem; font-size: 0.92rem; }
+.btn--sm     { padding: 0.55rem 1.1rem; font-size: 0.72rem; letter-spacing: 0.1em; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none; }
+
+/* ── Emblema masseria (arco) ── */
+.emblem { color: currentColor; }
+.emblem svg { display: block; }
+
+/* lockup logo (emblema + wordmark) */
+.lockup { display: inline-flex; align-items: center; gap: 0.7rem; color: var(--cream); }
+.lockup__txt { display: flex; flex-direction: column; line-height: 1; }
+.lockup__name { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.18rem; letter-spacing: 0.04em; }
+.lockup__sub  { font-family: 'Oswald', sans-serif; font-size: 0.52rem; letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold); margin-top: 3px; }
+
+/* ── Card pannello chiaro (usato in dashboard/form) ── */
+.panel {
+  background: var(--malt); border: 1px solid var(--line);
+  border-radius: 18px; padding: 1.6rem;
+}
+
+/* ── Utility ── */
+.hidden { display: none !important; }
+.center { text-align: center; }
+.gold { color: var(--gold); }
+.foam { color: var(--foam); }
+.mt-1 { margin-top: .8rem; } .mt-2 { margin-top: 1.6rem; } .mt-3 { margin-top: 2.4rem; }
+.mb-1 { margin-bottom: .8rem; } .mb-2 { margin-bottom: 1.6rem; }
+
+/* ── Campi form ── */
+.field { margin-bottom: 0.9rem; }
+.field label {
+  display: block; font-family: 'Oswald', sans-serif; font-size: 0.7rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 0.4rem; font-weight: 500;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 0.85rem 1rem; border-radius: 12px;
+  background: rgba(244,231,210,0.05); border: 1.5px solid var(--line);
+  color: var(--cream); font-size: 0.95rem; outline: none;
+  transition: border-color .18s, background .18s;
+}
+.field input::placeholder, .field textarea::placeholder { color: rgba(244,231,210,0.32); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); background: rgba(233,169,29,0.06); }
+.field select option { background: var(--malt); color: var(--cream); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+@media (max-width: 560px){ .grid-2 { grid-template-columns: 1fr; } }
+
+.form-err { color: var(--red); font-size: 0.82rem; margin: 0.4rem 0 0.6rem; min-height: 1rem; }
+
+/* ── Checkbox privacy ── */
+.checkrow { display: flex; gap: 0.7rem; align-items: flex-start; font-size: 0.82rem; color: var(--muted); margin: 0.4rem 0 0.2rem; }
+.checkrow input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--gold); flex-shrink: 0; }
+.checkrow a { color: var(--gold); text-decoration: underline; }
+
+/* ── Spinner ── */
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(28,18,11,0.3); border-top-color: var(--espresso); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(120%);
+  background: var(--malt); border: 1px solid var(--gold); color: var(--cream);
+  padding: 0.9rem 1.4rem; border-radius: 12px; font-size: 0.9rem; z-index: 9999;
+  box-shadow: var(--shadow); transition: transform .35s cubic-bezier(.2,.8,.2,1); max-width: 90vw;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
