@@ -12,7 +12,13 @@
 
 // ── INCOLLA QUI LA TUA CONFIG FIREBASE ───────────
 const firebaseConfig = {
-  apiKey:            "INSERISCI_API_KEY",
+  apiKey:            "AIzaSyCMnr5Ptx1a41R2sGH73lI3EtrUN41lmU8",
+  authDomain:        "festa-della-birra-sacramento.firebaseapp.com",
+  projectId:         "festa-della-birra-sacramento",
+  storageBucket:     "festa-della-birra-sacramento.firebasestorage.app",
+  messagingSenderId: "95344877116",
+  appId:             "1:95344877116:web:68e8656345697fae1b6d39"
+};
   authDomain:        "INSERISCI.firebaseapp.com",
   projectId:         "INSERISCI_PROJECT_ID",
   storageBucket:     "INSERISCI.appspot.com",
