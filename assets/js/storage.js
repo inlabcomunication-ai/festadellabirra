@@ -19,12 +19,6 @@ const firebaseConfig = {
   messagingSenderId: "95344877116",
   appId:             "1:95344877116:web:68e8656345697fae1b6d39"
 };
-  authDomain:        "INSERISCI.firebaseapp.com",
-  projectId:         "INSERISCI_PROJECT_ID",
-  storageBucket:     "INSERISCI.appspot.com",
-  messagingSenderId: "INSERISCI",
-  appId:             "INSERISCI"
-};
 // ──────────────────────────────────────────────────
 
 const CONFIGURED = !firebaseConfig.projectId.startsWith("INSERISCI");
