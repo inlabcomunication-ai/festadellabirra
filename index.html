@@ -17,18 +17,7 @@
 <!-- ═══ NAVBAR ═══ -->
 <nav class="nav" id="nav">
   <a href="/" class="lockup" aria-label="Masseria Sacramento">
-    <span class="emblem" aria-hidden="true">
-      <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
-        <rect x="6" y="7" width="52" height="51" rx="3" stroke="currentColor" stroke-width="2.4"/>
-        <path d="M20 51 V32 a12 12 0 0 1 24 0 V51" stroke="currentColor" stroke-width="2.4"/>
-        <line x1="14" y1="51" x2="50" y2="51" stroke="currentColor" stroke-width="2.4"/>
-        <line x1="32" y1="11" x2="32" y2="18" stroke="currentColor" stroke-width="2.4"/>
-      </svg>
-    </span>
-    <span class="lockup__txt">
-      <span class="lockup__name">Masseria Sacramento</span>
-      <span class="lockup__sub">Agriturismo</span>
-    </span>
+    <img src="/assets/logo.png" alt="Masseria Sacramento Agriturismo" class="nav-logo">
   </a>
   <button class="btn btn--gold nav__cta" data-goto-prenota>Prenota</button>
 </nav>
@@ -106,7 +95,11 @@
         <h3>Adulto</h3>
         <div class="tier__age">dai 18 anni</div>
         <div class="tier__price" id="tier-adult-price">15<small>€</small></div>
-        <div class="tier__note">Entrata, musica, birra a volontà e spritz fino a mezzanotte.</div>
+        <div class="tier__includes">
+          <span>🎵 Entrata + musica</span>
+          <span>🍺 Birra a volontà</span>
+          <span>🍊 Spritz fino a mezzanotte</span>
+        </div>
       </div>
       <div class="tier">
         <h3>Bambino</h3>
@@ -231,6 +224,39 @@
   </div>
 </section>
 
+<!-- ═══ REGOLE ═══ -->
+<section class="section section--rules">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow">Da sapere prima di venire</span>
+      <h2>Le <em>regole</em> dell'evento</h2>
+    </div>
+    <div class="rules-grid">
+      <div class="rule-item">
+        <div class="rule-item__ico">🚫</div>
+        <div class="rule-item__txt">
+          <h3>Niente cibo e bevande dall'esterno</h3>
+          <p>Non è possibile introdurre cibo o bevande provenienti dall'esterno della struttura.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-item__ico">👜</div>
+        <div class="rule-item__txt">
+          <h3>Borse di grandi dimensioni non ammesse</h3>
+          <p>Per motivi organizzativi non sono consentite borse o zaini di grandi dimensioni.</p>
+        </div>
+      </div>
+      <div class="rule-item rule-item--gold">
+        <div class="rule-item__ico">🍺</div>
+        <div class="rule-item__txt">
+          <h3>Birra a volontà e spritz fino a mezzanotte</h3>
+          <p>Con il ticket adulti hai diritto a birra alla spina illimitata e spritz per tutta la serata, fino a mezzanotte.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ INFO PRATICHE ═══ -->
 <section class="section section--malt">
   <div class="wrap">
@@ -242,14 +268,6 @@
       <div class="info-card">
         <h3>🎟️ Prevendita e ingresso</h3>
         <p>La prevendita è acquistabile online e in struttura. Sarà possibile acquistare il ticket anche durante la serata, ma al raggiungimento del numero massimo di partecipanti non sarà più possibile accedere all'evento.</p>
-      </div>
-      <div class="info-card">
-        <h3>🚫 Regole</h3>
-        <ul>
-          <li>Non è possibile portare cibo e bevande dall'esterno.</li>
-          <li>Non sono ammesse borse di grandi dimensioni.</li>
-          <li>Birra a volontà e spritz inclusi fino a mezzanotte.</li>
-        </ul>
       </div>
       <div class="info-card">
         <h3>📍 Dove siamo</h3>
@@ -270,15 +288,7 @@
   <div class="wrap">
     <div class="foot__main">
       <a href="/" class="lockup">
-        <span class="emblem" aria-hidden="true">
-          <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-            <rect x="6" y="7" width="52" height="51" rx="3" stroke="currentColor" stroke-width="2.4"/>
-            <path d="M20 51 V32 a12 12 0 0 1 24 0 V51" stroke="currentColor" stroke-width="2.4"/>
-            <line x1="14" y1="51" x2="50" y2="51" stroke="currentColor" stroke-width="2.4"/>
-            <line x1="32" y1="11" x2="32" y2="18" stroke="currentColor" stroke-width="2.4"/>
-          </svg>
-        </span>
-        <span class="lockup__txt"><span class="lockup__name">Masseria Sacramento</span><span class="lockup__sub">Agriturismo</span></span>
+        <img src="/assets/logo.png" alt="Masseria Sacramento Agriturismo" class="foot-logo">
       </a>
       <div class="foot__contact">
         <div class="foot__item"><b>Info e prenotazioni</b><a href="tel:+393281433143">328 143 3143</a></div>
