@@ -208,7 +208,8 @@
 
 /* ── INFO PRATICHE ── */
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 3rem; }
-@media (max-width: 760px){ .info-grid { grid-template-columns: 1fr; } }
+.info-grid .info-card:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; width: 100%; }
+@media (max-width: 760px){ .info-grid { grid-template-columns: 1fr; } .info-grid .info-card:last-child:nth-child(odd) { max-width: 100%; grid-column: auto; } }
 .info-card { background: var(--malt); border: 1px solid var(--line); border-radius: 18px; padding: 1.6rem 1.7rem; }
 .info-card h3 { font-family: 'Oswald'; text-transform: uppercase; font-size: 1rem; letter-spacing: 0.06em; color: var(--gold); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.6rem; }
 .info-card p, .info-card li { font-size: 0.92rem; color: var(--cream); }
@@ -318,7 +319,6 @@
   height: 44px;
   width: auto;
   display: block;
-  filter: brightness(0) invert(1);
   transition: opacity .2s;
 }
 .nav-logo:hover { opacity: 0.85; }
@@ -328,7 +328,6 @@
   height: 64px;
   width: auto;
   display: block;
-  filter: brightness(0) invert(1);
   opacity: 0.9;
   transition: opacity .2s;
 }
@@ -337,3 +336,12 @@
 @media (max-width: 600px) {
   .nav-logo { height: 34px; }
 }
+
+/* ── LOGO HERO ── */
+.hero-logo {
+  height: 120px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+@media (max-width: 600px) { .hero-logo { height: 80px; } }
