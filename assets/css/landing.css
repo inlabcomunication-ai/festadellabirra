@@ -233,3 +233,107 @@
   .coaster { width: 104px; height: 104px; }
   .coaster__price { font-size: 2.1rem; }
 }
+
+/* ── SEZIONE REGOLE ── */
+.section--rules {
+  background: linear-gradient(180deg, #1a100a 0%, var(--malt) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.section--rules::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80% 60% at 50% 100%, rgba(233,169,29,0.08), transparent 70%);
+  pointer-events: none;
+}
+.rules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.2rem;
+  margin-top: 3rem;
+}
+@media (max-width: 860px) { .rules-grid { grid-template-columns: 1fr; } }
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  background: var(--malt);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 1.8rem 1.6rem;
+  transition: border-color .2s, transform .2s;
+}
+.rule-item:hover { border-color: var(--line-strong); transform: translateY(-3px); }
+.rule-item--gold {
+  border-color: rgba(233,169,29,0.5);
+  background: linear-gradient(160deg, rgba(233,169,29,0.1), var(--malt) 60%);
+}
+.rule-item--gold:hover { border-color: var(--gold); }
+
+.rule-item__ico {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.rule-item__txt h3 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin-bottom: 0.4rem;
+}
+.rule-item--gold .rule-item__txt h3 { color: var(--gold); }
+.rule-item__txt p { font-size: 0.86rem; color: var(--muted); line-height: 1.55; }
+
+/* ── TICKET ADULTI: cosa include ── */
+.tier__includes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: rgba(233,169,29,0.08);
+  border: 1px solid rgba(233,169,29,0.25);
+  border-radius: 12px;
+}
+.tier__includes span {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cream);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── LOGO NAVBAR ── */
+.nav-logo {
+  height: 44px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+  transition: opacity .2s;
+}
+.nav-logo:hover { opacity: 0.85; }
+
+/* ── LOGO FOOTER ── */
+.foot-logo {
+  height: 64px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  transition: opacity .2s;
+}
+.foot-logo:hover { opacity: 1; }
+
+@media (max-width: 600px) {
+  .nav-logo { height: 34px; }
+}
