@@ -7,22 +7,19 @@ module.exports = async (req, res) => {
 
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-  const { adulti, bambini, nome, telefono } = req.body;
+  const { adulti, bambini, nome, telefono, priceAdult, priceChild, successUrl, cancelUrl } = req.body;
 
   const lineItems = [];
 
-  if (adulti > 0) {
-    lineItems.push({
-      price: 'price_1TidqmCAI1ZfdIAk5VsOE61w',
-      quantity: parseInt(adulti),
-    });
+  if (parseInt(adulti) > 0 && priceAdult) {
+    lineItems.push({ price: priceAdult, quantity: parseInt(adulti) });
+  }
+  if (parseInt(bambini) > 0 && priceChild) {
+    lineItems.push({ price: priceChild, quantity: parseInt(bambini) });
   }
 
-  if (bambini > 0) {
-    lineItems.push({
-      price: 'price_1TiduZCAI1ZfdIAk0zwDFkoh',
-      quantity: parseInt(bambini),
-    });
+  if (!lineItems.length) {
+    return res.status(400).json({ error: 'Nessun articolo nel carrello' });
   }
 
   try {
@@ -30,9 +27,9 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.origin}/grazie.html?nome=${encodeURIComponent(nome)}&telefono=${encodeURIComponent(telefono)}&adulti=${adulti}&bambini=${bambini}&pagato=true`,
-      cancel_url: `${req.headers.origin}/#prenota`,
-      metadata: { nome, telefono, adulti, bambini },
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: { nome, telefono },
     });
 
     res.status(200).json({ url: session.url });
