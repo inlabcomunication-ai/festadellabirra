@@ -219,15 +219,26 @@ async function handlePay() {
   if (state.adults > 0 && cfg.stripePriceAdult) items.push({ price: cfg.stripePriceAdult, quantity: state.adults });
   if (state.kids > 0 && cfg.stripePriceChild) items.push({ price: cfg.stripePriceChild, quantity: state.kids });
 
-  if (cfg.stripePk && items.length && window.Stripe) {
+  // 1) Stripe Checkout via serverless function
+  if (cfg.stripePk && items.length) {
     try {
-      const stripe = Stripe(cfg.stripePk);
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: items, mode: 'payment',
-        successUrl, cancelUrl,
+      const resp = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adulti: state.adults,
+          bambini: state.kids,
+          nome: booking.name,
+          telefono: booking.phone,
+          priceAdult: cfg.stripePriceAdult,
+          priceChild: cfg.stripePriceChild,
+          successUrl,
+          cancelUrl,
+        }),
       });
-      if (error) throw error;
-      return;
+      const data = await resp.json();
+      if (data.url) { window.location.href = data.url; return; }
+      throw new Error(data.error || 'Errore server');
     } catch (e) {
       $('pay-err').textContent = 'Pagamento non disponibile: ' + (e.message || 'errore Stripe') + '. La prenotazione è stata registrata, ti ricontatteremo.';
     }
