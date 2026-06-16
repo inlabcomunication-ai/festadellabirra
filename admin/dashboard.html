@@ -93,7 +93,10 @@
     <div class="table-wrap">
       <div class="table-head">
         <h3>Elenco prenotazioni</h3>
-        <button class="btn btn--ghost btn--sm" id="btn-csv">↓ Esporta CSV</button>
+        <div style="display:flex;gap:.6rem">
+          <button class="btn btn--ghost btn--sm" id="btn-csv">↓ Esporta CSV</button>
+          <button class="btn btn--danger btn--sm" id="btn-delete-all">🗑 Elimina prenotazioni</button>
+        </div>
       </div>
       <div class="table-scroll">
         <table>
@@ -125,15 +128,15 @@
 
           <div class="grid-2">
             <div class="field"><label>Adulti (15€)</label>
-              <div class="mstep"><button type="button" onclick="mstep('adults',-1)">–</button><input type="number" id="m-adults" value="1" min="1" oninput="recalcManual()"><button type="button" onclick="mstep('adults',1)">+</button></div>
+              <div class="mstep"><button type="button" >–</button><input type="number" id="m-adults" value="1" min="1"><button type="button" >+</button></div>
             </div>
             <div class="field"><label>Bambini 6–18 (10€)</label>
-              <div class="mstep"><button type="button" onclick="mstep('kids',-1)">–</button><input type="number" id="m-kids" value="0" min="0" oninput="recalcManual()"><button type="button" onclick="mstep('kids',1)">+</button></div>
+              <div class="mstep"><button type="button" >–</button><input type="number" id="m-kids" value="0" min="0"><button type="button" >+</button></div>
             </div>
           </div>
           <div class="grid-2">
             <div class="field"><label>Under 6 (gratis)</label>
-              <div class="mstep"><button type="button" onclick="mstep('free',-1)">–</button><input type="number" id="m-free" value="0" min="0" oninput="recalcManual()"><button type="button" onclick="mstep('free',1)">+</button></div>
+              <div class="mstep"><button type="button" >–</button><input type="number" id="m-free" value="0" min="0"><button type="button" >+</button></div>
             </div>
             <div class="field"><label>Pagamento</label>
               <select id="m-payment">
@@ -163,6 +166,19 @@
   <!-- ═══ PANEL: IMPOSTAZIONI ═══ -->
   <section class="panel" id="panel-impostazioni">
     <div class="col-2">
+
+      <div class="card" style="grid-column:1/-1">
+        <h3>Date dell'evento <span class="save-ind" id="si-days">✓ Salvato</span></h3>
+        <p class="note" style="margin-bottom:1rem">Le date qui sotto appaiono nel form di prenotazione della landing page. Aggiungi o rimuovi serate.</p>
+        <div id="days-list" style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem"></div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end">
+          <div class="field" style="flex:1;min-width:140px"><label>Data (AAAA-MM-GG)</label><input type="date" id="new-day-id"></div>
+          <div class="field" style="flex:2;min-width:160px"><label>Etichetta (es. 17 GIUGNO)</label><input type="text" id="new-day-label" placeholder="17 GIUGNO"></div>
+          <div class="field" style="flex:2;min-width:160px"><label>Sottotitolo</label><input type="text" id="new-day-sub" placeholder="Martedì · dalle 20:30"></div>
+          <button class="btn btn--ghost btn--sm" id="btn-add-day" style="margin-bottom:.1rem">+ Aggiungi</button>
+        </div>
+        <button class="btn btn--gold btn--sm" id="btn-save-days" style="margin-top:.8rem">Salva date</button>
+      </div>
 
       <div class="card">
         <h3>Evento e capienza <span class="save-ind" id="si-event">✓ Salvato</span></h3>
