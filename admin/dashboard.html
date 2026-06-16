@@ -23,7 +23,7 @@
     </span>
     <span class="lockup__txt"><span class="lockup__name">Festa della Birra</span><span class="lockup__sub">Area staff</span></span>
   </a>
-  <button class="btn btn--ghost btn--sm" onclick="logout()">Esci</button>
+  <button class="btn btn--ghost btn--sm" id="btn-logout">Esci</button>
 </header>
 
 <main class="dash-main">
@@ -35,9 +35,9 @@
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('prenotazioni', this)">Prenotazioni</button>
-    <button class="tab" onclick="switchTab('manuale', this)">+ Aggiungi (telefono)</button>
-    <button class="tab" onclick="switchTab('impostazioni', this)">Impostazioni</button>
+    <button class="tab active" id="tab-prenotazioni">Prenotazioni</button>
+    <button class="tab" id="tab-manuale">+ Aggiungi (telefono)</button>
+    <button class="tab" id="tab-impostazioni">Impostazioni</button>
   </div>
 
   <!-- ═══ PANEL: PRENOTAZIONI ═══ -->
@@ -86,14 +86,14 @@
         </select>
       </div>
       <div class="field" style="flex:1;min-width:180px"><label>Cerca nome o telefono</label><input type="text" id="f-search" oninput="applyFilters()" placeholder="Cerca…"></div>
-      <button class="btn btn--ghost btn--sm" onclick="clearFilters()">Reset</button>
+      <button class="btn btn--ghost btn--sm" id="btn-reset">Reset</button>
     </div>
 
     <!-- TABELLA -->
     <div class="table-wrap">
       <div class="table-head">
         <h3>Elenco prenotazioni</h3>
-        <button class="btn btn--ghost btn--sm" onclick="exportCSV()">↓ Esporta CSV</button>
+        <button class="btn btn--ghost btn--sm" id="btn-csv">↓ Esporta CSV</button>
       </div>
       <div class="table-scroll">
         <table>
@@ -147,7 +147,7 @@
           <div class="form-err" id="m-err"></div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem">
             <div><span class="cap__label">Totale</span> <span class="calc-tot" id="m-total">€15</span></div>
-            <button class="btn btn--gold" onclick="addManual()">Aggiungi prenotazione</button>
+            <button class="btn btn--gold" id="btn-add-manual">Aggiungi prenotazione</button>
           </div>
       </div>
       <div class="card">
@@ -172,7 +172,7 @@
           <div class="field"><label>Prezzo bambino (€)</label><input type="number" id="cfg-child" step="0.5" placeholder="10"></div>
         </div>
         <div class="field"><label>Telefono di contatto</label><input type="text" id="cfg-phone" placeholder="328 143 3143"></div>
-        <button class="btn btn--gold btn--sm" onclick="saveSettings('event')">Salva</button>
+        <button class="btn btn--gold btn--sm" id="btn-save-event">Salva</button>
       </div>
 
       <div class="card">
@@ -181,20 +181,20 @@
         <div class="field"><label>Price ID adulto</label><input type="text" id="cfg-pa" placeholder="price_…"></div>
         <div class="field"><label>Price ID bambino</label><input type="text" id="cfg-pc" placeholder="price_…"></div>
         <div class="field"><label>Payment Link (alternativa)</label><input type="text" id="cfg-link" placeholder="https://buy.stripe.com/…"></div>
-        <button class="btn btn--gold btn--sm" onclick="saveSettings('stripe')">Salva</button>
+        <button class="btn btn--gold btn--sm" id="btn-save-stripe">Salva</button>
         <p class="note">Crea su Stripe due prezzi (Adulto 15€, Bambino 10€), abilita il <b>Checkout client-only</b> e incolla qui Publishable key + i due Price ID. Vedi README.</p>
       </div>
 
       <div class="card">
         <h3>Meta Pixel <span class="save-ind" id="si-pixel">✓ Salvato</span></h3>
         <div class="field"><label>Pixel ID (facoltativo)</label><input type="text" id="cfg-pixel" placeholder="1234567890"></div>
-        <button class="btn btn--gold btn--sm" onclick="saveSettings('pixel')">Salva</button>
+        <button class="btn btn--gold btn--sm" id="btn-save-pixel">Salva</button>
       </div>
 
       <div class="card">
         <h3>Accesso dashboard <span class="save-ind" id="si-auth">✓ Salvato</span></h3>
         <div class="field"><label>Password staff</label><input type="text" id="cfg-pw" placeholder="sacramento2026"></div>
-        <button class="btn btn--gold btn--sm" onclick="saveSettings('auth')">Salva</button>
+        <button class="btn btn--gold btn--sm" id="btn-save-auth">Salva</button>
       </div>
 
     </div>
@@ -232,12 +232,13 @@
     </div>
     <div class="field"><label>Note</label><input type="text" id="e-note"></div>
     <div class="modal-actions">
-      <button class="btn btn--gold btn--sm" onclick="saveEdit()">Salva modifiche</button>
-      <button class="btn btn--ghost btn--sm" onclick="closeModal()">Annulla</button>
+      <button class="btn btn--gold btn--sm" id="btn-save-edit">Salva modifiche</button>
+      <button class="btn btn--ghost btn--sm" id="btn-close-modal">Annulla</button>
     </div>
   </div>
 </div>
 
 <script type="module" src="/assets/js/dashboard.js"></script>
+
 </body>
 </html>
