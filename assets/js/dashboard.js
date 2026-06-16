@@ -11,10 +11,10 @@ let ALL = [];
 
 /* ── AUTH ── */
 if (sessionStorage.getItem('ms_auth') !== '1') location.href = '/admin/login';
-window.logout = () => { sessionStorage.removeItem('ms_auth'); location.href = '/admin/login'; };
+globalThis.logout = () => { sessionStorage.removeItem('ms_auth'); location.href = '/admin/login'; };
 
 /* ── TABS ── */
-window.switchTab = (name, btn) => {
+globalThis.switchTab = (name, btn) => {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
@@ -68,7 +68,7 @@ function updateStats() {
   $('s-income').textContent = eur(income).replace(',00', '');
 }
 
-window.applyFilters = function () {
+globalThis.applyFilters = function () {
   let bks = [...ALL];
   const fd = $('f-day').value, fp = $('f-payment').value, fs = $('f-source').value, ft = $('f-search').value.trim().toLowerCase();
   if (fd) bks = bks.filter(b => b.day === fd);
@@ -103,14 +103,14 @@ window.applyFilters = function () {
 };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-window.clearFilters = () => { ['f-day', 'f-payment', 'f-source'].forEach(id => $(id).value = ''); $('f-search').value = ''; applyFilters(); };
+globalThis.clearFilters = () => { ['f-day', 'f-payment', 'f-source'].forEach(id => $(id).value = ''); $('f-search').value = ''; applyFilters(); };
 
 /* ── AZIONI RIGA ── */
-window.markPaid = async (id) => { await MS.updateBooking(id, { payment: 'paid', paidAt: new Date().toISOString() }); await renderAll(); toast('Segnata come pagata'); };
-window.delBooking = async (id) => { if (!confirm('Eliminare questa prenotazione? L\'azione è irreversibile.')) return; await MS.deleteBooking(id); await renderAll(); toast('Prenotazione eliminata'); };
+globalThis.markPaid = async (id) => { await MS.updateBooking(id, { payment: 'paid', paidAt: new Date().toISOString() }); await renderAll(); toast('Segnata come pagata'); };
+globalThis.delBooking = async (id) => { if (!confirm('Eliminare questa prenotazione? L\'azione è irreversibile.')) return; await MS.deleteBooking(id); await renderAll(); toast('Prenotazione eliminata'); };
 
 /* ── MODALE MODIFICA ── */
-window.openEdit = (id) => {
+globalThis.openEdit = (id) => {
   const b = ALL.find(x => x.id === id); if (!b) return;
   $('e-id').value = id;
   $('e-nome').value = b.nome || ''; $('e-cognome').value = b.cognome || '';
@@ -121,8 +121,8 @@ window.openEdit = (id) => {
   $('e-note').value = b.note || '';
   $('modal-bg').classList.add('open');
 };
-window.closeModal = () => $('modal-bg').classList.remove('open');
-window.saveEdit = async () => {
+globalThis.closeModal = () => $('modal-bg').classList.remove('open');
+globalThis.saveEdit = async () => {
   const id = $('e-id').value;
   const adults = +$('e-adults').value || 0, kids = +$('e-kids').value || 0, kidsFree = +$('e-free').value || 0;
   await MS.updateBooking(id, {
@@ -136,7 +136,7 @@ window.saveEdit = async () => {
 };
 
 /* ── AGGIUNTA MANUALE (telefono) ── */
-window.mstep = (key, delta) => {
+globalThis.mstep = (key, delta) => {
   const el = $('m-' + key);
   const min = key === 'adults' ? 1 : 0;
   el.value = Math.max(min, (+el.value || 0) + delta);
@@ -146,8 +146,8 @@ function recalcManual() {
   const a = +$('m-adults').value || 0, k = +$('m-kids').value || 0;
   $('m-total').textContent = eur(a * CFG.priceAdult + k * CFG.priceChild).replace(',00', '');
 }
-window.recalcManual = recalcManual;
-window.addManual = async () => {
+globalThis.recalcManual = recalcManual;
+globalThis.addManual = async () => {
   const nome = $('m-nome').value.trim(), cognome = $('m-cognome').value.trim(), tel = $('m-tel').value.trim();
   const err = $('m-err');
   if (!nome || !cognome) { err.textContent = 'Inserisci nome e cognome.'; return; }
@@ -177,7 +177,7 @@ window.addManual = async () => {
 };
 
 /* ── CSV ── */
-window.exportCSV = async () => {
+globalThis.exportCSV = async () => {
   const bks = await MS.getBookings();
   if (!bks.length) { toast('Nessun dato da esportare'); return; }
   const H = ['Nome', 'Cognome', 'Telefono', 'Email', 'Giorno', 'Adulti', 'Bambini 6-18', 'Under 6', 'Persone', 'Importo €', 'Pagamento', 'Origine', 'Note', 'Creato il'];
@@ -203,7 +203,7 @@ function loadSettings() {
   $('cfg-pixel').value = c.pixelId || '';
   $('cfg-pw').value = c.adminPw || '';
 }
-window.saveSettings = async (group) => {
+globalThis.saveSettings = async (group) => {
   const data = {};
   if (group === 'event') {
     data.capacity = Math.max(1, +$('cfg-capacity').value || 800);
