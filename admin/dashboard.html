@@ -239,5 +239,15 @@
 </div>
 
 <script type="module" src="/assets/js/dashboard.js"></script>
+<script>
+// Bridge: espone le funzioni del modulo al contesto globale per gli onclick inline
+const bridge = ['logout','switchTab','applyFilters','clearFilters','markPaid','delBooking','openEdit','closeModal','saveEdit','mstep','recalcManual','addManual','exportCSV','saveSettings'];
+bridge.forEach(fn => {
+  window[fn] = (...args) => {
+    if (window['_ms_' + fn]) return window['_ms_' + fn](...args);
+    setTimeout(() => window[fn] && window[fn](...args), 300);
+  };
+});
+</script>
 </body>
 </html>
