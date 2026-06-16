@@ -180,6 +180,8 @@ async function handlePay() {
   const data = validate();
   if (!data) return;
 
+  console.log('[DEBUG] cfg Stripe:', cfg.stripePk, cfg.stripePriceAdult, cfg.stripePriceChild);
+
   const people = state.adults + state.kids + state.kidsFree;
   const amount = state.adults * cfg.priceAdult + state.kids * cfg.priceChild;
 
@@ -214,12 +216,11 @@ async function handlePay() {
   localStorage.setItem('ms_pending', JSON.stringify({ bid, ...booking }));
   trackEvent('InitiateCheckout', { value: amount / 100, currency: 'EUR', num_items: people });
 
-  // 1) Stripe Checkout client-only (prezzi dinamici per quantità)
+  // 1) Stripe Checkout via serverless function
   const items = [];
   if (state.adults > 0 && cfg.stripePriceAdult) items.push({ price: cfg.stripePriceAdult, quantity: state.adults });
   if (state.kids > 0 && cfg.stripePriceChild) items.push({ price: cfg.stripePriceChild, quantity: state.kids });
 
-  // 1) Stripe Checkout via serverless function
   if (cfg.stripePk && items.length) {
     try {
       const resp = await fetch('/api/checkout', {
@@ -228,17 +229,17 @@ async function handlePay() {
         body: JSON.stringify({
           adulti: state.adults,
           bambini: state.kids,
-          nome: booking.name,
-          telefono: booking.phone,
+          nome: data.nome,
+          telefono: data.tel,
           priceAdult: cfg.stripePriceAdult,
           priceChild: cfg.stripePriceChild,
           successUrl,
           cancelUrl,
         }),
       });
-      const data = await resp.json();
-      if (data.url) { window.location.href = data.url; return; }
-      throw new Error(data.error || 'Errore server');
+      const result = await resp.json();
+      if (result.url) { window.location.href = result.url; return; }
+      throw new Error(result.error || 'Errore server');
     } catch (e) {
       $('pay-err').textContent = 'Pagamento non disponibile: ' + (e.message || 'errore Stripe') + '. La prenotazione è stata registrata, ti ricontatteremo.';
     }
