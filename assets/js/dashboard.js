@@ -40,23 +40,31 @@ async function renderAll() {
   applyFilters();
 }
 
+function getFilteredByDay() {
+  const fd = $('f-day').value;
+  return fd ? ALL.filter(b => b.day === fd) : ALL;
+}
+
 function updateCapacity() {
-  const used = MS.countPeople(ALL);
+  const fd = $('f-day').value;
+  const bks = getFilteredByDay();
+  const used = MS.countPeople(bks);
   const cap = MS.capacity();
   const pct = Math.min(100, Math.round((used / cap) * 100));
   $('cap-used').textContent = used;
-  $('cap-max').textContent = '/ ' + cap;
-  $('cap-pct').textContent = pct + '% occupato';
-  $('cap-left').textContent = Math.max(0, cap - used) + ' posti liberi';
+  $('cap-max').textContent = fd ? '(serata selezionata)' : '/ ' + cap;
+  $('cap-pct').textContent = fd ? '' : pct + '% occupato';
+  $('cap-left').textContent = fd ? '' : Math.max(0, cap - used) + ' posti liberi';
   const fill = $('cap-fill');
-  fill.style.width = pct + '%';
-  fill.classList.toggle('full', used >= cap);
+  fill.style.width = fd ? '0%' : pct + '%';
+  fill.classList.toggle('full', !fd && used >= cap);
 }
 
 function updateStats() {
-  const paid = ALL.filter(b => b.payment === 'paid');
-  const due = ALL.filter(b => b.payment === 'da_saldare');
-  const pending = ALL.filter(b => b.payment === 'pending');
+  const bks = getFilteredByDay();
+  const paid = bks.filter(b => b.payment === 'paid');
+  const due = bks.filter(b => b.payment === 'da_saldare');
+  const pending = bks.filter(b => b.payment === 'pending');
   const income = paid.reduce((a, b) => a + (Number(b.amount) || 0), 0);
   $('s-book').textContent = ALL.filter(b => b.payment !== 'pending').length;
   $('s-paid').textContent = paid.length;
@@ -66,6 +74,8 @@ function updateStats() {
 }
 
 function applyFilters() {
+  updateCapacity();
+  updateStats();
   let bks = [...ALL];
   const fd = $('f-day').value, fp = $('f-payment').value, fs = $('f-source').value, ft = $('f-search').value.trim().toLowerCase();
   if (fd) bks = bks.filter(b => b.day === fd);
@@ -194,6 +204,18 @@ function loadSettings() {
   $('cfg-phone').value = c.contactPhone || '';
   $('cfg-pixel').value = c.pixelId || '';
   $('cfg-pw').value = c.adminPw || '';
+  renderDaysList();
+}
+
+function renderDaysList() {
+  const days = CFG.eventDays || [];
+  $('days-list').innerHTML = days.length ? days.map((d, i) => `
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--malt);border:1px solid var(--line);border-radius:10px;padding:.6rem 1rem">
+      <span style="flex:1;font-family:'Oswald',sans-serif;font-size:.85rem">${d.label}</span>
+      <span style="flex:2;color:var(--muted);font-size:.8rem">${d.sub}</span>
+      <span style="color:var(--muted);font-size:.78rem">${d.id}</span>
+      <button class="act act--danger" data-action="removeday" data-idx="${i}">🗑</button>
+    </div>`).join('') : '<p class="note">Nessuna data configurata.</p>';
 }
 
 async function saveSettings(group) {
@@ -283,8 +305,59 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSaveAuth = $('btn-save-auth'); if (btnSaveAuth) btnSaveAuth.addEventListener('click', () => saveSettings('auth'));
 
   // modale
-  const btnSaveEdit = $('btn-save-edit'); if (btnSaveEdit) btnSaveEdit.addEventListener('click', saveEdit);
+  const btnDeleteAll = $('btn-delete-all');
+  if (btnDeleteAll) btnDeleteAll.addEventListener('click', async () => {
+    const days = CFG.eventDays || [];
+    const options = days.map(d => `"${d.label}"`).join(', ');
+    const choice = prompt(`Elimina prenotazioni di quale serata?\nScrivi: 17, 18, oppure tutto\n(Serate disponibili: ${options})`);
+    if (!choice) return;
+    const val = choice.trim().toLowerCase();
+    let toDelete;
+    if (val === 'tutto') {
+      toDelete = ALL;
+    } else {
+      const match = days.find(d => d.label.includes(val) || d.id.includes(val));
+      if (!match) { alert('Serata non trovata. Scrivi 17, 18 o tutto.'); return; }
+      toDelete = ALL.filter(b => b.day === match.id);
+    }
+    if (!toDelete.length) { alert('Nessuna prenotazione trovata.'); return; }
+    if (!confirm(`Eliminare ${toDelete.length} prenotazioni? L'azione è irreversibile.`)) return;
+    for (const b of toDelete) await MS.deleteBooking(b.id);
+    await renderAll();
+    toast(`${toDelete.length} prenotazioni eliminate`);
+  });
   const btnCloseModal = $('btn-close-modal'); if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+
+  // gestione date
+  const btnAddDay = $('btn-add-day');
+  if (btnAddDay) btnAddDay.addEventListener('click', () => {
+    const id = $('new-day-id').value.trim();
+    const label = $('new-day-label').value.trim().toUpperCase();
+    const sub = $('new-day-sub').value.trim();
+    if (!id || !label) { alert('Inserisci data ed etichetta.'); return; }
+    if ((CFG.eventDays || []).find(d => d.id === id)) { alert('Data già presente.'); return; }
+    CFG.eventDays = [...(CFG.eventDays || []), { id, label, sub }];
+    renderDaysList();
+    $('new-day-id').value = ''; $('new-day-label').value = ''; $('new-day-sub').value = '';
+  });
+
+  const daysList = $('days-list');
+  if (daysList) daysList.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action="removeday"]');
+    if (!btn) return;
+    const idx = +btn.dataset.idx;
+    CFG.eventDays = (CFG.eventDays || []).filter((_, i) => i !== idx);
+    renderDaysList();
+  });
+
+  const btnSaveDays = $('btn-save-days');
+  if (btnSaveDays) btnSaveDays.addEventListener('click', async () => {
+    await MS.saveCfg({ eventDays: CFG.eventDays || [] });
+    CFG = MS.cfg();
+    fillDaySelects();
+    const ind = $('si-days'); if (ind) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 1600); }
+    toast('Date salvate — la landing si aggiornerà automaticamente');
+  });
 });
 
 /* ── INIT ── */
