@@ -180,8 +180,6 @@ async function handlePay() {
   const data = validate();
   if (!data) return;
 
-  console.log('[DEBUG] cfg Stripe:', cfg.stripePk, cfg.stripePriceAdult, cfg.stripePriceChild);
-
   const people = state.adults + state.kids + state.kidsFree;
   const amount = state.adults * cfg.priceAdult + state.kids * cfg.priceChild;
 
