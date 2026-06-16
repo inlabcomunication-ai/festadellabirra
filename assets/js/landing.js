@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderDays();
   renderTiers();
+  renderHeroDate();
   bindSteppers();
   bindNav();
   await refreshAvailability();
@@ -42,6 +43,25 @@ function bindNav() {
   const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+}
+
+/* ── DATA HERO ── */
+function renderHeroDate() {
+  const el = $('hero-date');
+  if (!el) return;
+  const days = cfg.eventDays || [];
+  if (!days.length) return;
+  // estrai i numeri del giorno dalle label (es. "17 GIUGNO" → "17")
+  const nums = days.map(d => {
+    const m = d.label.match(/\d+/);
+    return m ? `<b>${m[0]}</b>` : d.label;
+  });
+  const month = days[0].label.match(/[A-Za-z]+/)?.[0] || 'giugno';
+  const time = (days[0].sub || '').match(/dalle \d+:\d+/)?.[0] || 'dalle 20:30';
+  const dateStr = nums.length === 1
+    ? `${nums[0]} ${month.toLowerCase()}`
+    : `${nums.join(' e ')} ${month.toLowerCase()}`;
+  el.innerHTML = `${dateStr} <span class="hero__dot"></span> ${time}`;
 }
 
 /* ── GIORNI ── */
