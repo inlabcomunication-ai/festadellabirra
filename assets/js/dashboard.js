@@ -11,23 +11,21 @@ let ALL = [];
 
 /* ── AUTH ── */
 if (sessionStorage.getItem('ms_auth') !== '1') location.href = '/admin/login';
-globalThis.logout = () => { sessionStorage.removeItem('ms_auth'); location.href = '/admin/login'; };
 
 /* ── TABS ── */
-globalThis.switchTab = (name, btn) => {
+function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   $('panel-' + name).classList.add('active');
   if (name === 'impostazioni') loadSettings();
-};
+}
 
 function dayLabel(id) {
   const d = (CFG.eventDays || []).find(x => x.id === id);
   return d ? d.label.charAt(0) + d.label.slice(1).toLowerCase() : (id || '—');
 }
 
-/* ── POPOLA select giorni ── */
 function fillDaySelects() {
   const opts = '<option value="">Tutte</option>' +
     (CFG.eventDays || []).map(d => `<option value="${d.id}">${dayLabel(d.id)}</option>`).join('');
@@ -35,7 +33,6 @@ function fillDaySelects() {
   $('m-day').innerHTML = (CFG.eventDays || []).map(d => `<option value="${d.id}">${dayLabel(d.id)}</option>`).join('');
 }
 
-/* ── RENDER ── */
 async function renderAll() {
   ALL = await MS.getBookings();
   updateCapacity();
@@ -68,17 +65,15 @@ function updateStats() {
   $('s-income').textContent = eur(income).replace(',00', '');
 }
 
-globalThis.applyFilters = function () {
+function applyFilters() {
   let bks = [...ALL];
   const fd = $('f-day').value, fp = $('f-payment').value, fs = $('f-source').value, ft = $('f-search').value.trim().toLowerCase();
   if (fd) bks = bks.filter(b => b.day === fd);
   if (fp) bks = bks.filter(b => b.payment === fp);
   if (fs) bks = bks.filter(b => (b.source || 'online') === fs);
   if (ft) bks = bks.filter(b => ((b.nome || '') + ' ' + (b.cognome || '') + ' ' + (b.tel || '')).toLowerCase().includes(ft));
-
   const tb = $('tbody');
   if (!bks.length) { tb.innerHTML = '<tr><td colspan="11" class="empty">Nessuna prenotazione trovata.</td></tr>'; return; }
-
   tb.innerHTML = bks.map((b, i) => {
     const pm = { paid: ['badge--paid', 'Pagato'], da_saldare: ['badge--due', 'Da saldare'], pending: ['badge--pending', 'In attesa'], failed: ['badge--pending', 'Fallito'] }[b.payment] || ['badge--pending', '—'];
     const src = (b.source === 'manuale') ? ['badge--manual', 'Telefono'] : ['badge--online', 'Online'];
@@ -94,23 +89,26 @@ globalThis.applyFilters = function () {
       <td><span class="badge ${src[0]}">${src[1]}</span></td>
       <td style="font-size:.76rem;color:var(--muted)">${dt}</td>
       <td>
-        ${b.payment !== 'paid' ? `<button class="act" onclick="markPaid('${b.id}')">✓ Paga</button>` : ''}
-        <button class="act" onclick="openEdit('${b.id}')">✏️</button>
-        <button class="act act--danger" onclick="delBooking('${b.id}')">🗑</button>
+        ${b.payment !== 'paid' ? `<button class="act" data-action="markpaid" data-id="${b.id}">✓ Paga</button>` : ''}
+        <button class="act" data-action="edit" data-id="${b.id}">✏️</button>
+        <button class="act act--danger" data-action="delete" data-id="${b.id}">🗑</button>
       </td>
     </tr>`;
   }).join('');
-};
+}
+
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-globalThis.clearFilters = () => { ['f-day', 'f-payment', 'f-source'].forEach(id => $(id).value = ''); $('f-search').value = ''; applyFilters(); };
+function clearFilters() {
+  ['f-day', 'f-payment', 'f-source'].forEach(id => $(id).value = '');
+  $('f-search').value = '';
+  applyFilters();
+}
 
-/* ── AZIONI RIGA ── */
-globalThis.markPaid = async (id) => { await MS.updateBooking(id, { payment: 'paid', paidAt: new Date().toISOString() }); await renderAll(); toast('Segnata come pagata'); };
-globalThis.delBooking = async (id) => { if (!confirm('Eliminare questa prenotazione? L\'azione è irreversibile.')) return; await MS.deleteBooking(id); await renderAll(); toast('Prenotazione eliminata'); };
+async function markPaid(id) { await MS.updateBooking(id, { payment: 'paid', paidAt: new Date().toISOString() }); await renderAll(); toast('Segnata come pagata'); }
+async function delBooking(id) { if (!confirm('Eliminare questa prenotazione?')) return; await MS.deleteBooking(id); await renderAll(); toast('Prenotazione eliminata'); }
 
-/* ── MODALE MODIFICA ── */
-globalThis.openEdit = (id) => {
+function openEdit(id) {
   const b = ALL.find(x => x.id === id); if (!b) return;
   $('e-id').value = id;
   $('e-nome').value = b.nome || ''; $('e-cognome').value = b.cognome || '';
@@ -120,9 +118,9 @@ globalThis.openEdit = (id) => {
   $('e-payment').value = b.payment || 'paid';
   $('e-note').value = b.note || '';
   $('modal-bg').classList.add('open');
-};
-globalThis.closeModal = () => $('modal-bg').classList.remove('open');
-globalThis.saveEdit = async () => {
+}
+function closeModal() { $('modal-bg').classList.remove('open'); }
+async function saveEdit() {
   const id = $('e-id').value;
   const adults = +$('e-adults').value || 0, kids = +$('e-kids').value || 0, kidsFree = +$('e-free').value || 0;
   await MS.updateBooking(id, {
@@ -133,21 +131,21 @@ globalThis.saveEdit = async () => {
     payment: $('e-payment').value, note: $('e-note').value.trim(),
   });
   closeModal(); await renderAll(); toast('Modifiche salvate');
-};
+}
 
-/* ── AGGIUNTA MANUALE (telefono) ── */
-globalThis.mstep = (key, delta) => {
+function mstep(key, delta) {
   const el = $('m-' + key);
   const min = key === 'adults' ? 1 : 0;
   el.value = Math.max(min, (+el.value || 0) + delta);
   recalcManual();
-};
+}
+
 function recalcManual() {
   const a = +$('m-adults').value || 0, k = +$('m-kids').value || 0;
   $('m-total').textContent = eur(a * CFG.priceAdult + k * CFG.priceChild).replace(',00', '');
 }
-globalThis.recalcManual = recalcManual;
-globalThis.addManual = async () => {
+
+async function addManual() {
   const nome = $('m-nome').value.trim(), cognome = $('m-cognome').value.trim(), tel = $('m-tel').value.trim();
   const err = $('m-err');
   if (!nome || !cognome) { err.textContent = 'Inserisci nome e cognome.'; return; }
@@ -156,13 +154,10 @@ globalThis.addManual = async () => {
   const adults = +$('m-adults').value || 0, kids = +$('m-kids').value || 0, kidsFree = +$('m-free').value || 0;
   const people = adults + kids + kidsFree;
   const amount = adults * CFG.priceAdult + kids * CFG.priceChild;
-
-  // controllo capienza
   const used = MS.countPeople(ALL);
   if (used + people > MS.capacity()) {
     if (!confirm(`Attenzione: superi la capienza (${used + people}/${MS.capacity()}). Aggiungere comunque?`)) return;
   }
-
   await MS.addBooking({
     nome, cognome, tel, email: $('m-email').value.trim(),
     day: $('m-day').value, adults, kids, kidsFree, people, amount,
@@ -170,14 +165,12 @@ globalThis.addManual = async () => {
     note: $('m-note').value.trim(), createdAt: new Date().toISOString(),
     paidAt: $('m-payment').value === 'paid' ? new Date().toISOString() : '',
   });
-  // reset
   ['m-nome', 'm-cognome', 'm-tel', 'm-email', 'm-note'].forEach(id => $(id).value = '');
   $('m-adults').value = 1; $('m-kids').value = 0; $('m-free').value = 0; recalcManual();
   await renderAll(); toast('Prenotazione aggiunta');
-};
+}
 
-/* ── CSV ── */
-globalThis.exportCSV = async () => {
+async function exportCSV() {
   const bks = await MS.getBookings();
   if (!bks.length) { toast('Nessun dato da esportare'); return; }
   const H = ['Nome', 'Cognome', 'Telefono', 'Email', 'Giorno', 'Adulti', 'Bambini 6-18', 'Under 6', 'Persone', 'Importo €', 'Pagamento', 'Origine', 'Note', 'Creato il'];
@@ -187,9 +180,8 @@ globalThis.exportCSV = async () => {
   a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
   a.download = 'festa_birra_prenotazioni_' + new Date().toISOString().slice(0, 10) + '.csv';
   a.click();
-};
+}
 
-/* ── IMPOSTAZIONI ── */
 function loadSettings() {
   const c = CFG;
   $('cfg-capacity').value = c.capacity || 800;
@@ -203,7 +195,8 @@ function loadSettings() {
   $('cfg-pixel').value = c.pixelId || '';
   $('cfg-pw').value = c.adminPw || '';
 }
-globalThis.saveSettings = async (group) => {
+
+async function saveSettings(group) {
   const data = {};
   if (group === 'event') {
     data.capacity = Math.max(1, +$('cfg-capacity').value || 800);
@@ -223,9 +216,8 @@ globalThis.saveSettings = async (group) => {
   CFG = MS.cfg();
   fillDaySelects(); recalcManual(); updateCapacity();
   const ind = $('si-' + group); if (ind) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 1600); }
-};
+}
 
-/* ── TOAST ── */
 let toastT;
 function toast(msg) {
   let el = $('toast');
@@ -234,6 +226,67 @@ function toast(msg) {
   clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
+/* ── EVENT LISTENERS ── */
+document.addEventListener('DOMContentLoaded', () => {
+  // logout
+  const btnLogout = $('btn-logout');
+  if (btnLogout) btnLogout.addEventListener('click', () => { sessionStorage.removeItem('ms_auth'); location.href = '/admin/login'; });
+
+  // tabs
+  const tabs = [
+    ['tab-prenotazioni', 'prenotazioni'],
+    ['tab-manuale', 'manuale'],
+    ['tab-impostazioni', 'impostazioni'],
+  ];
+  tabs.forEach(([id, name]) => {
+    const el = $(id);
+    if (el) el.addEventListener('click', function() { switchTab(name, this); });
+  });
+
+  // filtri
+  ['f-day', 'f-payment', 'f-source'].forEach(id => {
+    const el = $(id); if (el) el.addEventListener('change', applyFilters);
+  });
+  const fs = $('f-search'); if (fs) fs.addEventListener('input', applyFilters);
+
+  // reset e csv
+  const btnReset = $('btn-reset'); if (btnReset) btnReset.addEventListener('click', clearFilters);
+  const btnCsv = $('btn-csv'); if (btnCsv) btnCsv.addEventListener('click', exportCSV);
+
+  // azioni tabella (delegazione)
+  const tbody = $('tbody');
+  if (tbody) tbody.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const { action, id } = btn.dataset;
+    if (action === 'markpaid') await markPaid(id);
+    if (action === 'edit') openEdit(id);
+    if (action === 'delete') await delBooking(id);
+  });
+
+  // manuale
+  const btnAddManual = $('btn-add-manual'); if (btnAddManual) btnAddManual.addEventListener('click', addManual);
+  document.querySelectorAll('.mstep').forEach(wrap => {
+    const input = wrap.querySelector('input');
+    const key = input ? input.id.replace('m-', '') : null;
+    if (!key) return;
+    wrap.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => mstep(key, btn.textContent.trim() === '+' ? 1 : -1));
+    });
+    input.addEventListener('input', recalcManual);
+  });
+
+  // impostazioni
+  const btnSaveEvent = $('btn-save-event'); if (btnSaveEvent) btnSaveEvent.addEventListener('click', () => saveSettings('event'));
+  const btnSaveStripe = $('btn-save-stripe'); if (btnSaveStripe) btnSaveStripe.addEventListener('click', () => saveSettings('stripe'));
+  const btnSavePixel = $('btn-save-pixel'); if (btnSavePixel) btnSavePixel.addEventListener('click', () => saveSettings('pixel'));
+  const btnSaveAuth = $('btn-save-auth'); if (btnSaveAuth) btnSaveAuth.addEventListener('click', () => saveSettings('auth'));
+
+  // modale
+  const btnSaveEdit = $('btn-save-edit'); if (btnSaveEdit) btnSaveEdit.addEventListener('click', saveEdit);
+  const btnCloseModal = $('btn-close-modal'); if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+});
+
 /* ── INIT ── */
 (async () => {
   CFG = await MS.loadCfg();
@@ -241,6 +294,5 @@ function toast(msg) {
   fillDaySelects();
   recalcManual();
   await renderAll();
-  // aggiornamento in tempo reale (solo cloud)
   MS.onBookingsChange(bks => { ALL = bks; updateCapacity(); updateStats(); applyFilters(); });
 })();
