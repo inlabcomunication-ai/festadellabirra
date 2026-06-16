@@ -70,6 +70,8 @@ input, select, textarea { font-family: inherit; }
 .btn--gold:hover { background: var(--gold-bright); transform: translateY(-2px); box-shadow: 0 14px 38px rgba(233,169,29,0.4); }
 .btn--ghost  { background: transparent; border: 1.5px solid var(--line-strong); color: var(--cream); }
 .btn--ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn--danger { background: transparent; border: 1.5px solid #c0392b; color: #e74c3c; }
+.btn--danger:hover { background: #c0392b; color: #fff; }
 .btn--block  { width: 100%; }
 .btn--lg     { padding: 1.18rem 2.4rem; font-size: 0.92rem; }
 .btn--sm     { padding: 0.55rem 1.1rem; font-size: 0.72rem; letter-spacing: 0.1em; }
