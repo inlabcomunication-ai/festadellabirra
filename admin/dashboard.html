@@ -69,9 +69,9 @@
 
     <!-- FILTRI -->
     <div class="filters">
-      <div class="field"><label>Serata</label><select id="f-day" onchange="applyFilters()"></select></div>
+      <div class="field"><label>Serata</label><select id="f-day"></select></div>
       <div class="field"><label>Pagamento</label>
-        <select id="f-payment" onchange="applyFilters()">
+        <select id="f-payment">
           <option value="">Tutti</option>
           <option value="paid">Pagato</option>
           <option value="da_saldare">Da saldare</option>
@@ -79,13 +79,13 @@
         </select>
       </div>
       <div class="field"><label>Origine</label>
-        <select id="f-source" onchange="applyFilters()">
+        <select id="f-source">
           <option value="">Tutte</option>
           <option value="online">Online</option>
           <option value="manuale">Telefono</option>
         </select>
       </div>
-      <div class="field" style="flex:1;min-width:180px"><label>Cerca nome o telefono</label><input type="text" id="f-search" oninput="applyFilters()" placeholder="Cerca…"></div>
+      <div class="field" style="flex:1;min-width:180px"><label>Cerca nome o telefono</label><input type="text" id="f-search" placeholder="Cerca…"></div>
       <button class="btn btn--ghost btn--sm" id="btn-reset">Reset</button>
     </div>
 
