@@ -326,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await renderAll();
     toast(`${toDelete.length} prenotazioni eliminate`);
   });
+  const btnSaveEdit = $('btn-save-edit'); if (btnSaveEdit) btnSaveEdit.addEventListener('click', saveEdit);
   const btnCloseModal = $('btn-close-modal'); if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
 
   // gestione date
