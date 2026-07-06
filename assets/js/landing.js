@@ -154,14 +154,6 @@ async function refreshAvailability() {
     const used = MS.countPeople(bks);
     remaining = Math.max(0, MS.capacity() - used);
   } catch (e) { remaining = null; }
-  const el = $('hero-avail');
-  if (remaining === null) {
-    el.innerHTML = `<span class="live-dot"></span> Ingresso a <b>numero limitato</b> — prenota il tuo posto`;
-  } else if (remaining <= 0) {
-    el.innerHTML = `Posti <b>esauriti</b> — chiama per la lista d'attesa`;
-  } else {
-    el.innerHTML = `<span class="live-dot"></span> Ancora <b>${remaining}</b> posti disponibili su ${MS.capacity()}`;
-  }
 }
 
 function checkCapacityUI(people) {
