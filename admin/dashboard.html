@@ -36,6 +36,7 @@
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" id="tab-prenotazioni">Prenotazioni</button>
+    <button class="tab" id="tab-clienti">Clienti</button>
     <button class="tab" id="tab-manuale">+ Aggiungi (telefono)</button>
     <button class="tab" id="tab-impostazioni">Impostazioni</button>
   </div>
@@ -105,6 +106,42 @@
             <th>Importo</th><th>Pagamento</th><th>Origine</th><th>Creata</th><th>Azioni</th>
           </tr></thead>
           <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PANEL: CLIENTI (storico edizioni passate) ═══ -->
+  <section class="panel" id="panel-clienti">
+
+    <p class="note" style="margin-bottom:1.2rem">
+      Qui trovi tutte le prenotazioni delle <b>edizioni passate</b> (date non più attive in Impostazioni).
+      Sola consultazione: per modificare o eliminare una prenotazione riattiva prima la sua data in
+      <b>Impostazioni → Date dell'evento</b>, correggila da "Prenotazioni" e poi disattivala di nuovo.
+    </p>
+
+    <!-- FILTRI -->
+    <div class="filters">
+      <div class="field"><label>Data / edizione</label><select id="f2-day"></select></div>
+      <div class="field" style="flex:1;min-width:180px"><label>Cerca nome, telefono o email</label><input type="text" id="f2-search" placeholder="Cerca…"></div>
+      <button class="btn btn--ghost btn--sm" id="btn-reset2">Reset</button>
+    </div>
+
+    <!-- TABELLA -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3>Storico clienti (<span id="clienti-count">0</span>)</h3>
+        <div style="display:flex;gap:.6rem">
+          <button class="btn btn--ghost btn--sm" id="btn-csv2">↓ Esporta CSV</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Nome</th><th>Telefono</th><th>Data</th><th>Persone</th>
+            <th>Importo</th><th>Pagamento</th><th>Origine</th><th>Creata</th>
+          </tr></thead>
+          <tbody id="tbody2"></tbody>
         </table>
       </div>
     </div>
@@ -254,7 +291,9 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/dashboard.js"></script>
+<!-- ?v= serve a evitare che il browser usi una versione vecchia dalla cache.
+     Se in futuro modifichi dashboard.js, aumenta il numero (v=3, v=4...). -->
+<script type="module" src="/assets/js/dashboard.js?v=2"></script>
 
 </body>
 </html>
