@@ -26,6 +26,27 @@ function dayLabel(id) {
   return d ? d.label.charAt(0) + d.label.slice(1).toLowerCase() : (id || '—');
 }
 
+/* Una prenotazione è "attiva" se la sua data è tra quelle correnti impostate
+   in Impostazioni → Date dell'evento. Le altre (edizioni passate) finiscono
+   nello storico "Clienti". */
+function isActiveDay(id) {
+  return (CFG.eventDays || []).some(d => d.id === id);
+}
+function getActiveBookings() { return ALL.filter(b => isActiveDay(b.day)); }
+function getArchivedBookings() { return ALL.filter(b => !isActiveDay(b.day)); }
+
+/* Etichetta leggibile anche per date di edizioni passate non più in CFG.eventDays */
+function dayLabelArchived(id) {
+  const d = (CFG.eventDays || []).find(x => x.id === id);
+  if (d) return d.label.charAt(0) + d.label.slice(1).toLowerCase();
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(id || '');
+  if (m) {
+    const dt = new Date(+m[1], +m[2] - 1, +m[3]);
+    if (!isNaN(dt)) return dt.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+  return id || '—';
+}
+
 function fillDaySelects() {
   const opts = '<option value="">Tutte</option>' +
     (CFG.eventDays || []).map(d => `<option value="${d.id}">${dayLabel(d.id)}</option>`).join('');
@@ -38,11 +59,14 @@ async function renderAll() {
   updateCapacity();
   updateStats();
   applyFilters();
+  fillClientDaySelect();
+  applyClientFilters();
 }
 
 function getFilteredByDay() {
   const fd = $('f-day').value;
-  return fd ? ALL.filter(b => b.day === fd) : ALL;
+  const active = getActiveBookings();
+  return fd ? active.filter(b => b.day === fd) : active;
 }
 
 function updateCapacity() {
@@ -66,24 +90,29 @@ function updateStats() {
   const due = bks.filter(b => b.payment === 'da_saldare');
   const pending = bks.filter(b => b.payment === 'pending');
   const income = paid.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-  $('s-book').textContent = ALL.filter(b => b.payment !== 'pending').length;
+  $('s-book').textContent = getActiveBookings().filter(b => b.payment !== 'pending').length;
   $('s-paid').textContent = paid.length;
   $('s-due').textContent = due.length;
   $('s-pending').textContent = pending.length;
   $('s-income').textContent = eur(income).replace(',00', '');
 }
 
-function applyFilters() {
-  updateCapacity();
-  updateStats();
-  let bks = [...ALL];
+function filterActive() {
+  let bks = [...getActiveBookings()];
   const fd = $('f-day').value, fp = $('f-payment').value, fs = $('f-source').value, ft = $('f-search').value.trim().toLowerCase();
   if (fd) bks = bks.filter(b => b.day === fd);
   if (fp) bks = bks.filter(b => b.payment === fp);
   if (fs) bks = bks.filter(b => (b.source || 'online') === fs);
   if (ft) bks = bks.filter(b => ((b.nome || '') + ' ' + (b.cognome || '') + ' ' + (b.tel || '')).toLowerCase().includes(ft));
+  return bks;
+}
+
+function applyFilters() {
+  updateCapacity();
+  updateStats();
+  const bks = filterActive();
   const tb = $('tbody');
-  if (!bks.length) { tb.innerHTML = '<tr><td colspan="11" class="empty">Nessuna prenotazione trovata.</td></tr>'; return; }
+  if (!bks.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">Nessuna prenotazione trovata.</td></tr>'; return; }
   tb.innerHTML = bks.map((b, i) => {
     const pm = { paid: ['badge--paid', 'Pagato'], da_saldare: ['badge--due', 'Da saldare'], pending: ['badge--pending', 'In attesa'], failed: ['badge--pending', 'Fallito'] }[b.payment] || ['badge--pending', '—'];
     const src = (b.source === 'manuale') ? ['badge--manual', 'Telefono'] : ['badge--online', 'Online'];
@@ -108,6 +137,52 @@ function applyFilters() {
 }
 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+/* ── CLIENTI (storico edizioni passate) ── */
+function fillClientDaySelect() {
+  const sel = $('f2-day'); if (!sel) return;
+  const cur = sel.value;
+  const ids = [...new Set(getArchivedBookings().map(b => b.day))].filter(Boolean).sort().reverse();
+  sel.innerHTML = '<option value="">Tutte le date</option>' +
+    ids.map(id => `<option value="${id}">${esc(dayLabelArchived(id))}</option>`).join('');
+  if (ids.includes(cur)) sel.value = cur;
+}
+
+function filterArchived() {
+  let bks = [...getArchivedBookings()];
+  const fd = $('f2-day').value, ft = $('f2-search').value.trim().toLowerCase();
+  if (fd) bks = bks.filter(b => b.day === fd);
+  if (ft) bks = bks.filter(b => ((b.nome || '') + ' ' + (b.cognome || '') + ' ' + (b.tel || '') + ' ' + (b.email || '')).toLowerCase().includes(ft));
+  return bks;
+}
+
+function applyClientFilters() {
+  const bks = filterArchived();
+  const cEl = $('clienti-count'); if (cEl) cEl.textContent = bks.length;
+  const tb2 = $('tbody2'); if (!tb2) return;
+  if (!bks.length) { tb2.innerHTML = '<tr><td colspan="9" class="empty">Nessun cliente trovato.</td></tr>'; return; }
+  tb2.innerHTML = bks.map((b, i) => {
+    const pm = { paid: ['badge--paid', 'Pagato'], da_saldare: ['badge--due', 'Da saldare'], pending: ['badge--pending', 'In attesa'], failed: ['badge--pending', 'Fallito'] }[b.payment] || ['badge--pending', '—'];
+    const src = (b.source === 'manuale') ? ['badge--manual', 'Telefono'] : ['badge--online', 'Online'];
+    const dt = b.createdAt ? new Date(b.createdAt).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+    return `<tr>
+      <td>${i + 1}</td>
+      <td><strong>${esc(b.nome)} ${esc(b.cognome)}</strong><br><span style="color:var(--muted);font-size:.78rem">${esc(b.email || '')}</span></td>
+      <td>${esc(b.tel || '—')}</td>
+      <td>${esc(dayLabelArchived(b.day))}</td>
+      <td>${b.adults || 0} ad · ${b.kids || 0} bm · ${b.kidsFree || 0} u6<br><strong>${b.people || 0} pers.</strong></td>
+      <td><strong>${eur(b.amount).replace(',00', '')}</strong></td>
+      <td><span class="badge ${pm[0]}">${pm[1]}</span></td>
+      <td><span class="badge ${src[0]}">${src[1]}</span></td>
+      <td style="font-size:.76rem;color:var(--muted)">${dt}</td>
+    </tr>`;
+  }).join('');
+}
+
+function clearClientFilters() {
+  $('f2-day').value = ''; $('f2-search').value = '';
+  applyClientFilters();
+}
 
 function clearFilters() {
   ['f-day', 'f-payment', 'f-source'].forEach(id => $(id).value = '');
@@ -180,17 +255,19 @@ async function addManual() {
   await renderAll(); toast('Prenotazione aggiunta');
 }
 
-async function exportCSV() {
-  const bks = await MS.getBookings();
+function bookingsToCSV(bks, filenamePrefix) {
   if (!bks.length) { toast('Nessun dato da esportare'); return; }
   const H = ['Nome', 'Cognome', 'Telefono', 'Email', 'Giorno', 'Adulti', 'Bambini 6-18', 'Under 6', 'Persone', 'Importo €', 'Pagamento', 'Origine', 'Note', 'Creato il'];
   const R = bks.map(b => [b.nome, b.cognome, b.tel, b.email, b.day, b.adults, b.kids, b.kidsFree, b.people, ((b.amount || 0) / 100).toFixed(2), b.payment, b.source || 'online', b.note || '', b.createdAt]);
   const csv = [H, ...R].map(r => r.map(v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
-  a.download = 'festa_birra_prenotazioni_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.download = filenamePrefix + '_' + new Date().toISOString().slice(0, 10) + '.csv';
   a.click();
 }
+
+function exportCSV() { bookingsToCSV(filterActive(), 'festa_birra_prenotazioni'); }
+function exportClientiCSV() { bookingsToCSV(filterArchived(), 'festa_birra_clienti'); }
 
 function loadSettings() {
   const c = CFG;
@@ -257,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // tabs
   const tabs = [
     ['tab-prenotazioni', 'prenotazioni'],
+    ['tab-clienti', 'clienti'],
     ['tab-manuale', 'manuale'],
     ['tab-impostazioni', 'impostazioni'],
   ];
@@ -274,6 +352,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // reset e csv
   const btnReset = $('btn-reset'); if (btnReset) btnReset.addEventListener('click', clearFilters);
   const btnCsv = $('btn-csv'); if (btnCsv) btnCsv.addEventListener('click', exportCSV);
+
+  // filtri, reset e csv — Clienti (storico)
+  ['f2-day', 'f2-search'].forEach(id => {
+    const el = $(id); if (el) el.addEventListener(id === 'f2-search' ? 'input' : 'change', applyClientFilters);
+  });
+  const btnReset2 = $('btn-reset2'); if (btnReset2) btnReset2.addEventListener('click', clearClientFilters);
+  const btnCsv2 = $('btn-csv2'); if (btnCsv2) btnCsv2.addEventListener('click', exportClientiCSV);
 
   // azioni tabella (delegazione)
   const tbody = $('tbody');
@@ -314,11 +399,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const val = choice.trim().toLowerCase();
     let toDelete;
     if (val === 'tutto') {
-      toDelete = ALL;
+      toDelete = getActiveBookings();
     } else {
       const match = days.find(d => d.label.includes(val) || d.id.includes(val));
       if (!match) { alert('Serata non trovata. Scrivi 17, 18 o tutto.'); return; }
-      toDelete = ALL.filter(b => b.day === match.id);
+      toDelete = getActiveBookings().filter(b => b.day === match.id);
     }
     if (!toDelete.length) { alert('Nessuna prenotazione trovata.'); return; }
     if (!confirm(`Eliminare ${toDelete.length} prenotazioni? L'azione è irreversibile.`)) return;
@@ -356,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await MS.saveCfg({ eventDays: CFG.eventDays || [] });
     CFG = MS.cfg();
     fillDaySelects();
+    await renderAll(); // riclassifica subito prenotazioni attive vs clienti (storico) in base alle nuove date
     const ind = $('si-days'); if (ind) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 1600); }
     toast('Date salvate — la landing si aggiornerà automaticamente');
   });
@@ -368,5 +454,5 @@ document.addEventListener('DOMContentLoaded', () => {
   fillDaySelects();
   recalcManual();
   await renderAll();
-  MS.onBookingsChange(bks => { ALL = bks; updateCapacity(); updateStats(); applyFilters(); });
+  MS.onBookingsChange(bks => { ALL = bks; updateCapacity(); updateStats(); applyFilters(); fillClientDaySelect(); applyClientFilters(); });
 })();
