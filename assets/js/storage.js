@@ -46,13 +46,33 @@ const DEFAULT_CFG = {
 // Riferimenti Firestore (popolati solo se Firebase è disponibile)
 let fb = null; // null = non inizializzato, false = non disponibile, oggetto = pronto
 
+/* Evita i caricamenti infiniti: se la rete non risponde entro N secondi
+   la promessa viene rifiutata e il codice passa al fallback locale,
+   invece di restare appeso per sempre. */
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout: ' + label)), ms))
+  ]);
+}
+
 async function ensureFirebase() {
   if (fb !== null || !CONFIGURED) return fb;
   try {
-    const appMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const fs = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const appMod = await withTimeout(import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"), 15000, 'firebase-app');
+    const fs = await withTimeout(import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"), 15000, 'firebase-firestore');
     const app = appMod.initializeApp(firebaseConfig);
-    fb = { db: fs.getFirestore(app), fns: fs };
+    // experimentalAutoDetectLongPolling: se la rete blocca il WebChannel
+    // (capita su reti mobili, VPN, firewall e a volte su Safari iOS),
+    // Firestore se ne accorge e ripiega da solo sul long polling.
+    let _db;
+    try {
+      _db = fs.initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+    } catch (e) {
+      // se Firestore era già inizializzato altrove, riuso quello esistente
+      _db = fs.getFirestore(app);
+    }
+    fb = { db: _db, fns: fs };
     MS.backend = 'cloud';
   } catch (e) {
     fb = false; // import fallito → resta in locale
@@ -74,7 +94,7 @@ export const MS = {
     try {
       if (!f) throw new Error('local');
       const { doc, getDoc } = f.fns;
-      const snap = await getDoc(doc(f.db, 'config', 'main'));
+      const snap = await withTimeout(getDoc(doc(f.db, 'config', 'main')), 12000, 'loadCfg');
       MS._cfg = { ...DEFAULT_CFG, ...(snap.exists() ? snap.data() : {}) };
       MS.backend = 'cloud';
     } catch (e) {
@@ -102,7 +122,7 @@ export const MS = {
     try {
       if (!f) throw new Error('local');
       const { collection, getDocs, query, orderBy } = f.fns;
-      const snap = await getDocs(query(collection(f.db, 'bookings'), orderBy('createdAt', 'desc')));
+      const snap = await withTimeout(getDocs(query(collection(f.db, 'bookings'), orderBy('createdAt', 'desc'))), 12000, 'getBookings');
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (e) {
       return lsGet().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
